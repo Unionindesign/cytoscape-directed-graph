@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>CytoScape</title>
+    <style type="text/css">
+        body {
+            background-color: #252525;
+            color: #efefef
+        }   
+        h2 {
+            text-align: center;
+        }
+        #cy {
+                width: 98%;
+                height: 82vh;
+                border-radius: 7px;
+                margin: 0 auto;
+                background-color: white;
+            }
+            .submit-btn {
+                margin: 7% 0 5% 0;
+            }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <h2>Graph Visualization with CytoScapeJS</h2>
+    <div class="row">
+        <div class="col-sm-4">
+            <form>
+                <div class="form-group">
+                    <label for="nodes-input">Number of Nodes</label>
+                    <input type="number" class="form-control" id="nodes-input" placeholder="ex: 45" min="0">    
+                </div>
+            </form>
+        </div>
+
+        <div class="col-sm-4">
+            <form>
+                <div class="form-group">
+                    <label for="edges-input">Number of Connections</label>
+                    <input type="number" class="form-control" id="edges-input" placeholder="ex: 164" min="0"> 
+                </div>
+            </form>
+        </div>
+               
+        <div class="col-sm-4">
+            <button type="submit" id="create-chart-button" class="btn btn-info submit-btn">Create Chart</button>
+        </div>
+    
+    </div>
+    <div class="row">
+        <div id="cy"></div>
+    </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js" integrity="sha512-cjmYAonfXK+azDmWqvnqq8xmygHRHqVI7S0zuRxQnvcYVeoakwthRX6pPKoXfG1oIjDvMUtteRV9PhQjJwKWxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+        const numNodesInput = document.getElementById('nodes-input');
+        const numEdgesInput = document.getElementById('edges-input');
+        const createChartButton = document.getElementById('create-chart-button');
+
+        function createRandomData(numNodes, numEdges){
+            let data = []; 
+            const nodes = [...Array(numNodes).keys()]
+            console.log("Random Nodes: ", nodes)
+            nodes.forEach(node => {
+                data.push(
+                    {
+                        data: { id: node.toString()}
+                    }
+                )
+            })
+            for(let i = 0; i < numEdges; i++){
+                const rand1 = Math.floor(Math.random() * numNodes);
+                const rand2 = Math.floor(Math.random() * numNodes);
+                data.push(
+                    {
+                        data: {
+                        id: `${rand1}${rand2}`,
+                        source: `${rand1}`, 
+                        target: `${rand2}`
+                    }
+                })
+             }
+             console.log("Random Data: ", data)
+             
+             return data
+        }
+       
+        // const randomData = createRandomData(48, 86);
+        function createChart(data){
+            var cy = cytoscape({
+                container: document.getElementById('cy'), // container to render in
+                elements: data,
+
+                style: [
+                {
+                    selector: 'node',//03fcd7  
+                    style: {
+                    'background-color': '#0373fc',
+                    'width': 20,
+                    'height': 20,
+                    'label': 'data(id)'
+                    }
+                },
+
+                {
+                    selector: 'edge',
+                    style: {
+                    'width': 1,
+                    'line-color': '#252525',
+                    'target-arrow-color': '#252525',
+                    'target-arrow-shape': 'triangle',
+                    'curve-style': 'bezier'
+                    }
+                }
+                ],
+
+                layout: {
+                name: 'random',
+                rows: 1
+                }
+            })
+        }
+
+        createChartButton.addEventListener('click', (evt) => {
+            evt.preventDefault();
+            if(!numEdgesInput.value || !numNodesInput.value){
+                    console.log("No value...")
+                return;
+            }
+            const nodes = parseInt(numNodesInput.value)
+            const edges = parseInt(numEdgesInput.value)
+
+            //create the new chart by calling the create randomData function with the values, then the createChart function
+            const data = createRandomData(nodes, edges);
+            createChart(data);
+        }); 
+
+        window.onload = (event) =>{
+            const initialData = createRandomData(40, 128);
+            createChart(initialData)
+        };
+      
+    
+</script>
+</body>
+</html>
+<!-- From Docs, basic data structure of nodes and edges...
+
+
+        // var cy = cytoscape({
+
+        // container: document.getElementById('cy'), // container to render in
+        elements: [ // list of graph elements to start with
+        // { // node a
+        //     data: { id: 'a' }
+        // },
+        // { // node b
+        //     data: { id: 'b' }
+        // },
+        // { // node c
+        //     data: { id: 'c' }
+        // },
+        // { // edge ab
+        //     data: { id: 'ab', source: 'a', target: 'b' }
+        // },
+        // { // edge ab
+        //     data: { id: 'bc', source: 'b', target: 'c' }
+        // }
+        // ],
+
+        // style: [ // the stylesheet for the graph
+        // {
+        //     selector: 'node',
+        //     style: {
+        //     'background-color': '#666',
+        //     'label': 'data(id)'
+        //     }
+        // },
+
+        // {
+        //     selector: 'edge',
+        //     style: {
+        //     'width': 3,
+        //     'line-color': '#ccc',
+        //     'target-arrow-color': '#ccc',
+        //     'target-arrow-shape': 'triangle',
+        //     'curve-style': 'bezier'
+        //     }
+        // }
+        // ],
+
+        // layout: {
+        // name: 'random',
+        // rows: 1
+        // }
+
+        // });
+ -->
+<!-- 
+    first iteration was hard-coded test data set
+     const nodesHC = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        const edgesHC = [
+            {source: 2, target: 1 },
+            {source: 1, target: 5 },
+            {source: 5, target: 5 },
+            {source: 6, target: 1 },
+            {source: 3, target: 4 },
+            {source: 2, target: 5 },
+            {source: 2, target: 9 },
+            {source: 8, target: 1 },
+            {source: 4, target: 2 },
+            {source: 2, target: 7 },
+            {source: 9, target: 7 },
+            {source: 2, target: 1 }
+        ]
+
+        function createData(nodes, edges){
+            const data = [];
+            nodes.forEach(node => {
+                data.push(
+                    {
+                        data: { id: node.toString()}
+                    }
+                )
+            })
+            edges.forEach(edge => {
+                data.push(
+                    {
+                        data: { 
+                            id: `${edge.source}${edge.target}`,
+                            source: `${edge.source}`, 
+                            target: `${edge.target}`
+                        }
+                    }
+                )
+            })
+            console.log("Test Data: ", data)
+            return data
+        }
+        const testData = createData(nodesHC, edgesHC);
+ -->
